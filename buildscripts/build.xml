@@ -1,0 +1,161 @@
+<project name="BeerMate" default="deployCodeCheckOnly" basedir="." xmlns:sf="antlib:com.salesforce">
+    <property name="sf.sessionId" value=""/>
+    <property name="sf.maxPoll" value="5000"/>
+    <property name="sf.serverurl" value="https://test.salesforce.com"/>
+    <condition property="sf.sessionId" value="">
+        <not>
+            <isset property="sf.sessionId"/>
+        </not>
+    </condition>
+    <record name="deployment.log"/>
+
+    <taskdef name="executeApex" classname="classes.AnonymousApex" classpath="AnonymousApex.jar">
+        <classpath>
+            <pathelement location="ant-salesforce.jar"></pathelement>
+        </classpath>
+    </taskdef>
+
+    <taskdef resource="com/salesforce/antlib.xml" uri="antlib:com.salesforce">
+        <classpath>
+            <pathelement location="ant-salesforce.jar"/>
+        </classpath>
+    </taskdef>
+
+    <target name="prepareStaticResourcesZip">
+        <exec executable="cmd">
+            <arg value="/c"/>
+            <arg value="minimalize.bat"/>
+            <arg value="-p"/>
+        </exec>
+        <ant antfile="Compiler.xml" target="zipAndCompressECommerce"/>
+    </target>
+
+    <target name="deployCodeCheckOnly" depends="prepareStaticResourcesZip">
+        <echo>deployCodeCheckOnly_${sf.username}</echo>
+        <sf:deploy username="${sf.username}" password="${sf.password}"
+                   sessionId="${sf.sessionId}" serverurl="${sf.serverurl}" maxPoll="${sf.maxPoll}"
+                   deployRoot="../src" checkOnly="true"/>
+    </target>
+
+    <target name="deployCode" depends="prepareStaticResourcesZip">
+        <echo>deployCode_${sf.username}</echo>
+        <sf:deploy username="${sf.username}" password="${sf.password}"
+                   sessionId="${sf.sessionId}" serverurl="${sf.serverurl}" maxPoll="${sf.maxPoll}"
+                   deployroot="../src">
+        </sf:deploy>
+    </target>
+
+    <target name="buildCache">
+        <executeApex
+                username="${sf.username}"
+                password="${sf.password}"
+                serverurl="${sf.serverurl}"
+                code="new ccrz.ccConfigCacheBuilder().build(new Map&lt;String,Object&gt;{});">
+        </executeApex>
+    </target>
+
+    <target name="unitTests" depends="prepareStaticResourcesZip">
+        <echo>unitTests_${sf.username}</echo>
+        <sf:deploy username="${sf.username}" password="${sf.password}"
+                   sessionId="${sf.sessionId}" serverurl="${sf.serverurl}" maxPoll="${sf.maxPoll}" checkOnly="true"
+                   testLevel="RunSpecifiedTests"
+                   deployroot="../src">
+            <runtest>CCB2B_AdditionalDataControllerTest</runtest>
+            <runtest>CCB2B_AdvertisingControllerTest</runtest>
+            <runtest>CCB2B_AdvertisingServiceTest</runtest>
+            <runtest>CCB2B_ApplicationLogServiceTest</runtest>
+            <runtest>CCB2B_CartControllerTest</runtest>
+            <runtest>CCB2B_CartSAPServiceTest</runtest>
+            <runtest>CCB2B_CartServiceTest</runtest>
+            <runtest>CCB2B_CartTriggerHandlerTest</runtest>
+            <runtest>CCB2B_CartUpdateServiceTest</runtest>
+            <runtest>CCB2B_cc_hk_EffectiveAccountTest</runtest>
+            <runtest>CCB2B_cc_hk_UserInterfaceTest</runtest>
+            <runtest>CCB2B_cc_hk_UserInterface_UKTest</runtest>
+            <runtest>CCB2B_ccLogicCartAddToUKTest</runtest>
+            <runtest>CCB2B_ccLogicCartCreateTest</runtest>
+            <runtest>CCB2B_ccLogicCartRemoveTest</runtest>
+            <runtest>CCB2B_ccLogicProductPricingTest</runtest>
+            <runtest>CCB2B_ccLogicStorefrontIsAccessibleTest</runtest>
+            <runtest>CCB2B_ccLogicStorefrontRouteFailureTest</runtest>
+            <runtest>CCB2B_ccLogicUserGetProfileDataTest</runtest>
+            <runtest>CCB2B_ccLogicUserLoginTest</runtest>
+            <runtest>CCB2B_ccLogicWLCreateTest</runtest>
+            <runtest>CCB2B_ccServiceAccountTest</runtest>
+            <runtest>CCB2B_ccServiceCartItemTest</runtest>
+            <runtest>CCB2B_ccServiceCartTest</runtest>
+            <runtest>CCB2B_ccServiceCartUKTest</runtest>
+            <runtest>CCB2B_ccServiceUserTest</runtest>
+            <runtest>CCB2B_ccServiceMenuTest</runtest>
+            <runtest>CCB2B_ccServiceOrderItemTest</runtest>
+            <runtest>CCB2B_ccServiceOrderTest</runtest>
+            <runtest>CCB2B_ccServicePLITest</runtest>
+            <runtest>CCB2B_ccServiceProductTest</runtest>
+            <runtest>CCB2B_CutOffTimeServiceTest</runtest>
+            <runtest>CCB2B_CutOffTimeControllerTest</runtest>
+            <runtest>CCB2B_DealServiceTest</runtest>
+            <runtest>CCB2B_DeliveryDateTest</runtest>
+            <runtest>CCB2B_DiscoverGridControllerTest</runtest>
+            <runtest>CCB2B_DiscoverGridServiceTest</runtest>
+            <runtest>CCB2B_InterfaceLogServiceTest</runtest>
+            <runtest>CCB2B_LogicCartPlaceTest</runtest>
+            <runtest>CCB2B_OrderBatchTest</runtest>
+            <runtest>CCB2B_OrderControllerTest</runtest>
+            <runtest>CCB2B_OrderServiceTest</runtest>
+            <runtest>CCB2B_Product2TriggerHandlerTest</runtest>
+            <runtest>CCB2B_ProductListControllerTest</runtest>
+            <runtest>CCB2B_ProductListServiceTest</runtest>
+            <runtest>CCB2B_OrderServiceTest</runtest>
+            <runtest>CCB2B_PromotionControllerTest</runtest>
+            <runtest>CCB2B_PromotionServiceTest</runtest>
+            <runtest>CCB2B_PromotionWrappersTest</runtest>
+            <runtest>CCB2B_UserTriggerHandlerTest</runtest>
+            <runtest>CCB2B_UtilTest</runtest>
+            <runtest>TriggerHandlerTest</runtest>
+            <runtest>CCB2B_PromotionAddToServiceTest</runtest>
+            <runtest>CCB2B_CreateOfflineOrdersTest</runtest>
+            <runtest>CCB2B_OfflineOrdersBatchTest</runtest>
+            <runtest>CCB2B_FirstWishListBatchTest</runtest>
+            <runtest>CCB2B_ccServiceWishListTest</runtest>
+            <runtest>CCB2B_MyAccountControllerTest</runtest>
+            <runtest>CCB2B_MyDocumentsServiceTest</runtest>
+            <runtest>CCB2B_ccServiceCategoryTest</runtest>
+            <runtest>CCB2B_ccLogicOrderReOrderTest</runtest>
+            <runtest>CCB2B_WishlistServiceTest</runtest>
+            <runtest>CCB2B_ccServiceWishListItemTest</runtest>
+            <runtest>CCB2B_MailSendingServiceTest</runtest>
+            <runtest>CCB2B_MailServiceTest</runtest>
+            <runtest>CCB2B_OrderReminderServiceTest</runtest>
+            <runtest>CCB2B_DeactivatePriceListItemsTest</runtest>
+            <runtest>CCB2B_AccountPriceListItemBatchTest</runtest>
+            <runtest>CCB2B_wsOfferItemsTest</runtest>
+            <runtest>CCB2B_ccLogicPIFetchEntitledTest</runtest>
+            <runtest>CCB2B_ccLogicUserRegisterTest</runtest>
+            <runtest>CCB2B_SSOConnectedAppTest</runtest>
+            <runtest>CCB2B_ccLogicUserUpdateProfileDataTest</runtest>
+            <runtest>CCB2B_SegmentBatchTest</runtest>
+            <runtest>CCB2B_SegmentBatchScheduleTest</runtest>
+            <runtest>CCB2B_wsMenuItemsTest</runtest>
+            <runtest>CCB2B_AccountGroupBatchTest</runtest>
+			<runtest>CCB2B_MyDocumentsWebserviceTest</runtest>
+            <runtest>CCB2B_WorldPayServiceTest</runtest>
+            <runtest>CCB2B_wsWorldPayTest</runtest>
+            <runtest>CCB2B_ManagePaymentTokenDetailsTest</runtest>
+            <runtest>CCB2B_AccountSegmentBatchTest</runtest>
+            <runtest>CCB2B_B2BManagementControllerTest</runtest>
+            <runtest>CCB2B_ApplicationLogBatchTest</runtest>
+            <runtest>CCB2B_IndexRefreshBatchUKTest</runtest>
+            <runtest>CCB2B_ContactTriggerHandlerTest</runtest>
+            <runtest>CCB2B_InterfaceLogBatchTest</runtest>
+            <runtest>CCB2B_PortalUserRegistrationTest</runtest>
+            <runtest>CCB2B_ccLogicCartRemoveCartTest</runtest>
+            <runtest>CCB2B_RelatedAccountTest</runtest>
+            <runtest>CCB2B_PaymentTokenControllerTest</runtest>
+            <runtest>CCB2B_PaymentTokenServiceTest</runtest>
+            <runtest>CCB2B_ExceptionTest</runtest>
+            <runtest>CCB2B_ccLogicSICreateTest</runtest>
+            <runtest>CCB2B_ccFriendlyRewriterTest</runtest>
+		  </sf:deploy>
+	</target>
+
+</project>
